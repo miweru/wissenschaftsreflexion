@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+
+    <title>Studiensimulator</title>
+    <style>
+        body {
+            padding: 50px;
+            font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="content"></div>
+    <script type="module" src="studie.js"></script>
+    <script type="module">
+        import { Studie } from './studie.js';
+        ReactDOM.render(<Studie />, document.getElementById('content'));
+    </script>
+</body>
+</html>
