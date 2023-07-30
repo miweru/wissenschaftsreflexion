@@ -11,6 +11,7 @@ def Studie(props):
     painEventsA, setPainEventsA = React.useState({})  # Counter for pain events in group A
     painEventsB, setPainEventsB = React.useState({})  # Counter for pain events in group B
 
+
     emojis = ['👩', '👩🏻', '👩🏼', '👩🏽', '👩🏾', '👩🏿', '👨', '👨🏻', '👨🏼', '👨🏽', '👨🏾', '👨🏿',
               '🧓', '🧓🏻', '🧓🏼', '🧓🏽', '🧓🏾', '🧓🏿', '👴', '👴🏻', '👴🏼', '👴🏽', '👴🏾', '👴🏿',
               '👵', '👵🏻', '👵🏼', '👵🏽', '👵🏾', '👵🏿', '👧', '👧🏻', '👧🏼', '👧🏽', '👧🏾', '👧🏿',
@@ -22,10 +23,11 @@ def Studie(props):
 
     # Create a list of participant emojis
     participants, setParticipants = React.useState([])
-    emoji_string = ' '.join(participants)
+    emoji_string = ' '.join([emoji for emoji, id in participants])
 
-    # Update participants and painEvents whenever participantCount changes
-    React.useEffect(lambda: setParticipants([random.choice(emojis) for _ in range(participantCount)]),
+
+    # Create a list of participant emojis with unique IDs
+    React.useEffect(lambda: setParticipants([(random.choice(emojis), i) for i in range(participantCount)]),
                     [participantCount])
 
     # Split the participants into groups
@@ -52,24 +54,30 @@ def Studie(props):
         nonlocal timeElapsed
         nonlocal studyInterval  # Declare studyInterval as nonlocal
         newPainEventsA = dict(painEventsA)  # Copy the dictionary
+        #print(painEventsA)
         newPainEventsB = dict(painEventsB)  # Copy the dictionary
 
-        for emoji in participants:
-            if random.random() < truePainLevel:  # Use Python's random library
-                if emoji in groupA:
-                    if emoji not in newPainEventsA:
-                        newPainEventsA[emoji] = 0
-                    newPainEventsA[emoji] += 1
+        for participant in participants:
+            emoji, id = participant
+            if random.random() < truePainLevel:
+                if participant in groupA:
+                    #print(newPainEventsA[id])
+                    if id not in newPainEventsA:
+                        newPainEventsA[id] = 0
+                    newPainEventsA[id] += 1
+                    #print(newPainEventsA[id])
                 else:
-                    if emoji not in newPainEventsB:
-                        newPainEventsB[emoji] = 0
-                    newPainEventsB[emoji] += 1
+                    if id not in newPainEventsB:
+                        newPainEventsB[id] = 0
+                    newPainEventsB[id] += 1
+
         timeElapsed += 1
         if timeElapsed >= studyDuration:
             clearInterval(studyInterval)
 
         setPainEventsA(newPainEventsA)
         setPainEventsB(newPainEventsB)
+        #print(painEventsA)
         setTimeElapsed(timeElapsed)
 
     def handleButtonClick(event):
@@ -99,13 +107,14 @@ def Studie(props):
                                React.createElement('p', {}, 'Kopfschmerzereignisse in Gruppe A: ' + str(
                                    sum(painEventsA.values())) if isSplit else ''),
                                # Show the total number of pain events in group A
-                               React.createElement('div', {}, groupA if isSplit else emoji_string),
+                               React.createElement('div', {}, ' '.join(
+                                   [emoji for emoji, id in groupA]) if isSplit else emoji_string),
                                React.createElement('p', {}, 'Kopfschmerzereignisse in Gruppe B: ' + str(
                                    sum(painEventsB.values())) if isSplit else ''),
                                # Show the total number of pain events in group B
-                               React.createElement('div', {}, groupB if isSplit else '')
+                               React.createElement('div', {},
+                                                   ' '.join([emoji for emoji, id in groupB]) if isSplit else '')
                                )
-
 
 react_element = React.createElement(Studie, {})
 ReactDOM.render(react_element, document.getElementById('content'))
