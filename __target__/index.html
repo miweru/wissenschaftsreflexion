@@ -20,19 +20,21 @@
 </head>
 <body>
     <script>
-window.calculate_p_value = function(tValue, degreesOfFreedom) {
-    var absoluteT = Math.abs(tValue);
-    var pValueOneTail;
-    if (tValue < 0) {
-        // t-Wert ist negativ, also betrachten wir das linke Ende des Tests
-        pValueOneTail = jStat.studentt.cdf(tValue, degreesOfFreedom);
-    } else {
-        // t-Wert ist positiv, also betrachten wir das rechte Ende des Tests
-        pValueOneTail = 1 - jStat.studentt.cdf(absoluteT, degreesOfFreedom);
-    }
-    return pValueOneTail;
-};
-</script>
+    window.calculate_p_value = function(tValue, degreesOfFreedom) {
+        var absoluteT = Math.abs(tValue);
+        var pValueOneTail;
+        if (tValue < 0) {
+            // t-Wert ist negativ, also betrachten wir das linke Ende des Tests
+            pValueOneTail = jStat.studentt.cdf(tValue, degreesOfFreedom);
+        } else {
+            // t-Wert ist positiv, also betrachten wir das rechte Ende des Tests
+            pValueOneTail = 1 - jStat.studentt.cdf(absoluteT, degreesOfFreedom);
+        }
+        // Für einen zweiseitigen Test, verdoppeln wir den einseitigen P-Wert
+        var pValueTwoTail = 2 * pValueOneTail;
+        return pValueTwoTail;
+    };
+    </script>
 
 
     <div id="content"></div>

@@ -33,16 +33,14 @@ class PainEvents:
 def calculate_t_value(group1, group2):
     mean1 = sum(group1) / len(group1)
     mean2 = sum(group2) / len(group2)
-    print(mean1,mean2,group1,group2)
-    var1 = sum((xi - mean1) ** 2 for xi in group1) / len(group1)
-    var2 = sum((xi - mean2) ** 2 for xi in group2) / len(group2)
+    var1 = sum((xi - mean1) ** 2 for xi in group1) / (len(group1) - 1)
+    var2 = sum((xi - mean2) ** 2 for xi in group2) / (len(group2) - 1)
     t_value = (mean1 - mean2) / ((var1 / len(group1) + var2 / len(group2)) ** 0.5)
-    print(t_value)
     return t_value
 
 
 def Studie(props):
-    participantCount, setParticipantCount = React.useState(0)
+    participantCount, setParticipantCount = React.useState(100)
     splitRatio, setSplitRatio = React.useState(0.5)
     isSplit, setIsSplit = React.useState(False)
     truePainLevel = 0.005
@@ -57,6 +55,7 @@ def Studie(props):
     painEventsAcum, setpainEventsAcum = React.useState(0)
     painEventsBcum, setpainEventsBcum = React.useState(0)
     pValue, setPValue = React.useState(-1)
+    addValue, setaddValue = React.useState([])
 
     emojis = ['👩', '👩🏻', '👩🏼', '👩🏽', '👩🏾', '👩🏿', '👨', '👨🏻', '👨🏼', '👨🏽', '👨🏾', '👨🏿',
               '🧓', '🧓🏻', '🧓🏼', '🧓🏽', '🧓🏾', '🧓🏿', '👴', '👴🏻', '👴🏼', '👴🏽', '👴🏾', '👴🏿',
@@ -133,12 +132,28 @@ def Studie(props):
         if timeElapsed >= studyDuration:
             clearInterval(studyInterval)
             #print(painEventsA.values())
-            setPValue(t_to_p(calculate_t_value(list(painEventsA.values()), list(painEventsB.values())),len(painEventsA.values())+len(painEventsB.values())))
+            setPValue(t_to_p(calculate_t_value(list(painEventsA.values()), list(painEventsB.values())),len(painEventsA.values())+len(painEventsB.values())-2))
+            differenziert = {}
+            for participant in participants:
+                emoji, id = participant
+                if emoji not in differenziert:
+                    differenziert[emoji]=([],[])
+                if participant in groupA:
+                    differenziert[emoji][0].append(painEventsA.get(id))
+                else:
+                    differenziert[emoji][1].append(painEventsB.get(id))
+            result_text = []
+            for emoji, (gA, gB) in differenziert.items():
+                if len(gA)>1 and len(gB)>1 and sum(gA) and sum(gB):
+                    result_text.append((t_to_p(calculate_t_value(gA,gB),len(gA)+len(gB)-2),emoji+"-Gruppe (A:{}/{},B:{}/{}) mit P-Wert {}".format(sum(gA),len(gA),sum(gB),len(gB),round(t_to_p(calculate_t_value(gA,gB),len(gA)+len(gB)-2),4))))
+            result_text = [v2 for v1, v2 in sorted(result_text, key=lambda x: x[0])]
+            setaddValue(result_text)
 
     def handleButtonClick(event):
         setIsSplit(True)
         nonlocal studyInterval  # Declare studyInterval as nonlocal
         studyInterval = setInterval(startStudy, 333)  # Set an interval to repeat the study every second
+
 
     # render code ...
     # Add another input for study duration
@@ -169,7 +184,9 @@ def Studie(props):
                                # Show the total number of pain events in group B
                                React.createElement('div', {},
                                                    ' '.join([emoji for emoji, id in groupB]) if isSplit else ''),
-                               React.createElement('p', {}, 'p-Wert: ' + str(pValue)),
+                               React.createElement('p', {}, 'p-Wert: {}'.format(round(pValue,4)) if pValue!=-1 else ""),
+                               *[React.createElement('p',{},e) for e in addValue],
+                               #React.createElement('p', {}, addValue),
                                )
 
 react_element = React.createElement(Studie, {})
