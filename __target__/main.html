@@ -3,6 +3,8 @@
 <head>
     <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/jstat/jstat@1.9.4/dist/jstat.min.js"></script>
+
 
     <title>Studiensimulator</title>
     <style>
@@ -17,6 +19,17 @@
     </style>
 </head>
 <body>
+    <script>
+    window.calculate_p_value = function(tValue, degreesOfFreedom) {
+        // In jStat ist die Funktion jStat.studentt.cdf der kumulative Verteilungsfunktion (CDF)
+        // Wir nehmen das Komplement (1 - CDF), da der p-Wert das Rechte Ende der Verteilung ist
+        var pValueOneTail = 1 - jStat.studentt.cdf(tValue, degreesOfFreedom);
+        // Für einen zweiseitigen Test multiplizieren Sie den p-Wert mit 2
+        var pValueTwoTails = pValueOneTail * 2;
+        return pValueTwoTails;
+    };
+    </script>
+
     <div id="content"></div>
     <script type="module" src="studie.js"></script>
 </body>
